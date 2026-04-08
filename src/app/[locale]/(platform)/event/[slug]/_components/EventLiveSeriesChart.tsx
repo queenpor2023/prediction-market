@@ -403,13 +403,42 @@ function formatUsd(value: number, digits = 2) {
   })
 }
 
+function resolveLiveSeriesTopicPriceDigits(topic: string) {
+  return topic.trim().toLowerCase() === 'equity_prices' ? 2 : 4
+}
+
+function resolveAdaptiveCryptoPriceDigits(referencePrice?: number | null) {
+  const numericPrice = Number(referencePrice)
+  if (!Number.isFinite(numericPrice) || numericPrice <= 0) {
+    return 4
+  }
+
+  if (Math.abs(numericPrice) >= 10) {
+    return 2
+  }
+
+  return 4
+}
+
+export function resolveLiveSeriesPriceDisplayDigits(
+  topic: string,
+  showPriceDecimals: boolean,
+  referencePrice?: number | null,
+) {
+  const isEquityTopic = topic.trim().toLowerCase() === 'equity_prices'
+  if (isEquityTopic) {
+    return showPriceDecimals ? 2 : 0
+  }
+
+  return resolveAdaptiveCryptoPriceDigits(referencePrice)
+}
+
 function normalizeLiveChartPrice(price: number, topic: string) {
   if (!Number.isFinite(price) || price <= 0) {
     return null
   }
 
-  const normalizedTopic = topic.trim().toLowerCase()
-  const digits = normalizedTopic === 'equity_prices' ? 2 : 4
+  const digits = resolveLiveSeriesTopicPriceDigits(topic)
   const factor = 10 ** digits
   return Math.round(price * factor) / factor
 }
@@ -698,9 +727,6 @@ export default function EventLiveSeriesChart({
   const site = useSiteIdentity()
   const { width: windowWidth } = useWindowSize()
   const liveColor = config.line_color || '#F59E0B'
-  const priceDisplayDigits = config.show_price_decimals ? 2 : 0
-  const headerPriceDisplayDigits = Math.max(2, priceDisplayDigits)
-  const deltaDisplayDigits = 0
   const subscriptionSymbol = useMemo(
     () => normalizeSubscriptionSymbol(config.topic, config.symbol),
     [config.symbol, config.topic],
@@ -1180,6 +1206,20 @@ export default function EventLiveSeriesChart({
     : fallbackCurrentPrice
   const axisSourceData = data.length > 0 ? data : renderData
   const resolvedBaselinePrice = baselinePrice ?? referenceSnapshot?.opening_price ?? null
+  const precisionReferencePrice = currentPrice
+    ?? resolvedBaselinePrice
+    ?? referenceSnapshot?.latest_price
+    ?? referenceSnapshot?.closing_price
+    ?? referenceSnapshot?.opening_price
+    ?? persistedFallbackPrice?.price
+    ?? null
+  const priceDisplayDigits = resolveLiveSeriesPriceDisplayDigits(
+    config.topic,
+    config.show_price_decimals,
+    precisionReferencePrice,
+  )
+  const headerPriceDisplayDigits = Math.max(2, priceDisplayDigits)
+  const deltaDisplayDigits = priceDisplayDigits >= 4 ? 4 : 0
   const delta = currentPrice != null && resolvedBaselinePrice != null
     ? currentPrice - resolvedBaselinePrice
     : null
