@@ -23,7 +23,7 @@ VALUES (
   'BNB',
   'BNB/USD',
   '#F0B90B',
-  NULL,
+  '/images/live-assets/bnb.svg',
   TRUE,
   FALSE,
   1440
