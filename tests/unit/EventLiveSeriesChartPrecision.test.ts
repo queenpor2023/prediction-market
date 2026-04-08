@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { resolveLiveSeriesPriceDisplayDigits } from '@/app/[locale]/(platform)/event/[slug]/_components/EventLiveSeriesChart'
+import { resolveLiveSeriesPriceDisplayDigits } from '@/app/[locale]/(platform)/event/[slug]/_utils/liveSeriesPricePrecision'
 
 describe('resolveLiveSeriesPriceDisplayDigits', () => {
   it('keeps equity prices at 2 digits when decimals are enabled', () => {

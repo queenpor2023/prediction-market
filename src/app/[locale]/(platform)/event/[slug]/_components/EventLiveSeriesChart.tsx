@@ -12,6 +12,10 @@ import { useWindowSize } from '@/hooks/useWindowSize'
 import { formatCurrency } from '@/lib/formatters'
 import { cn } from '@/lib/utils'
 import { createWebSocketReconnectController } from '@/lib/websocket-reconnect'
+import {
+  resolveLiveSeriesPriceDisplayDigits,
+  resolveLiveSeriesTopicPriceDigits,
+} from '../_utils/liveSeriesPricePrecision'
 import EventChart from './EventChart'
 import EventSeriesPills from './EventSeriesPills'
 
@@ -401,36 +405,6 @@ function formatUsd(value: number, digits = 2) {
     minimumFractionDigits: digits,
     maximumFractionDigits: digits,
   })
-}
-
-function resolveLiveSeriesTopicPriceDigits(topic: string) {
-  return topic.trim().toLowerCase() === 'equity_prices' ? 2 : 4
-}
-
-function resolveAdaptiveCryptoPriceDigits(referencePrice?: number | null) {
-  const numericPrice = Number(referencePrice)
-  if (!Number.isFinite(numericPrice) || numericPrice <= 0) {
-    return 4
-  }
-
-  if (Math.abs(numericPrice) >= 10) {
-    return 2
-  }
-
-  return 4
-}
-
-export function resolveLiveSeriesPriceDisplayDigits(
-  topic: string,
-  showPriceDecimals: boolean,
-  referencePrice?: number | null,
-) {
-  const isEquityTopic = topic.trim().toLowerCase() === 'equity_prices'
-  if (isEquityTopic) {
-    return showPriceDecimals ? 2 : 0
-  }
-
-  return resolveAdaptiveCryptoPriceDigits(referencePrice)
 }
 
 function normalizeLiveChartPrice(price: number, topic: string) {
