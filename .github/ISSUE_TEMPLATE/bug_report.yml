@@ -1,4 +1,4 @@
-name: Bug Report
+name: Bug report
 description: Report a reproducible bug in the product
 title: '[Bug]: '
 labels:
@@ -32,7 +32,6 @@ body:
         - Device:
         - OS:
         - Browser:
-        - App version/commit:
     validations:
       required: true
   - type: textarea
