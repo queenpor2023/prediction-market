@@ -25,7 +25,6 @@ const config: NextConfig = {
     '@reown/appkit-adapter-wagmi',
     '@sentry',
     '@wagmi',
-    '@walletconnect',
     'cbw-sdk',
     'porto',
     'viem',
